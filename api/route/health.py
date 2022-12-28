@@ -4,7 +4,7 @@ from flask import Blueprint, jsonify, make_response, request
 from flask.wrappers import Response
 from sqlalchemy import exc
 
-from database.connect import db
+from database.connect import ManagedSession
 from database.health import Health
 from database.users import User
 from utils import log
@@ -38,7 +38,7 @@ def new_account() -> Response:
             HTTPStatus.BAD_REQUEST.value,
         )
 
-    db_user = User.query.filter_by(email=email).first()
+    db_user = Health.query.filter_by(email=email).first()
 
     if db_user is not None:
         log.print_warn(f"User with email {email} already in db")
@@ -50,10 +50,9 @@ def new_account() -> Response:
     user = User(email=email, password=password, used=False, plus_18=plus_18, disabled=False)
 
     try:
-        db.session.add(user)
-        db.session.commit()
+        with ManagedSession() as session:
+            session.add(user)  # pylint: disable=no-member
     except exc.IntegrityError:
-        db.session.rollback()
         return make_response(
             jsonify({"status": "error", "message": "failed to update health"}),
             HTTPStatus.BAD_REQUEST.value,

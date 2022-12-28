@@ -53,7 +53,9 @@ class MultiHandler(logging.Handler):
             if key in self.files:
                 return self.files[key]
 
-            file_pointer = open(os.path.join(self.dirname, f"{key}.log"), "a", encoding="utf-8")
+            file_pointer = open(  # pylint: disable=consider-using-with
+                os.path.join(self.dirname, f"{key}.log"), "a", encoding="utf-8"
+            )
             self.files[key] = file_pointer
             return file_pointer
         finally:
@@ -63,7 +65,9 @@ class MultiHandler(logging.Handler):
         # No lock here; following code for StreamHandler and FileHandler
         try:
             name = record.threadName
-            if any([n for n in self.block_list_prefixes if name.startswith(n)]):
+            if any(  # pylint: disable=use-a-generator
+                [n for n in self.block_list_prefixes if name.startswith(n)]
+            ):
                 return
             file_pointer = self._get_or_open(name)
             msg = self.format(record)
