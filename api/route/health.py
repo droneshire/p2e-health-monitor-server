@@ -3,7 +3,6 @@ from http import HTTPStatus
 
 from flask import Blueprint, jsonify, make_response, request
 from flask.wrappers import Response
-from sqlalchemy import exc
 
 from database.connect import ManagedSession
 from database.health import Health, HealthSchema
@@ -25,15 +24,15 @@ def health(botname) -> Response:
 
         data = request.get_json()
         if not data:
-            log.print_fail(f"Missing data for bot")
+            log.print_fail("Missing data for bot")
             return make_response(
-                jsonify({"status": "error", "message": f"missing data from bot status"}),
+                jsonify({"status": "error", "message": "missing data from bot status"}),
                 HTTPStatus.BAD_REQUEST.value,
             )
 
         missing_fields = [i for i in data.keys() if i not in ["name", "num_users", "users"]]
         if any(missing_fields):
-            log.print_fail(f"Missing fields for bot")
+            log.print_fail("Missing fields for bot")
             return make_response(
                 jsonify({"status": "error", "message": f"missing data fields {missing_fields}"}),
                 HTTPStatus.PARTIAL_CONTENT.value,
@@ -52,12 +51,12 @@ def health(botname) -> Response:
             if data.get("config_update", ""):
                 bot.config_update = data["config_update"]
 
-            session.add(bot)
+            session.add(bot)  # pylint: disable=no-member
 
             for user in data["users"]:
                 missing_fields = [i for i in user.keys() if i not in ["username", "wallets"]]
                 if any(missing_fields):
-                    log.print_fail(f"Missing fields for users")
+                    log.print_fail("Missing fields for users")
                     return make_response(
                         jsonify(
                             {
@@ -75,14 +74,15 @@ def health(botname) -> Response:
                 if botter is None:
                     botter = User(username=user["username"], health_id=bot.id)
                 botter.wallets = user["wallets"]
-                session.add(botter)
+                session.add(botter)  # pylint: disable=no-member
 
         log.print_normal(f"Updated bot status: {json.dumps(data, indent=4)}")
 
         log.print_ok_arrow("Succeeded!")
 
         return make_response(jsonify(HealthSchema().dump(bot)), HTTPStatus.OK.value)
-    elif request.method == "GET":
+
+    if request.method == "GET":
         log.print_normal(f"GET: health/{botname}")
 
         if bot is None:
@@ -94,3 +94,8 @@ def health(botname) -> Response:
 
         log.print_ok_arrow("Succeeded!")
         return make_response(jsonify(HealthSchema().dump(bot)), HTTPStatus.OK.value)
+
+    return make_response(
+        jsonify({"status": "error", "message": "unsupported request type"}),
+        HTTPStatus.BAD_REQUEST.value,
+    )
