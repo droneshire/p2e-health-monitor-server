@@ -2,6 +2,7 @@ import argparse
 import os
 import threading
 
+import discord_notify
 from flask import Flask
 
 from api.route import health, home
@@ -10,6 +11,8 @@ from status_publisher import Publisher
 from utils import log
 from utils.file_util import make_sure_path_exists
 
+DISCORD_WEBHOOK = ""
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -17,6 +20,7 @@ def parse_args() -> argparse.Namespace:
     make_sure_path_exists(log_dir)
     parser.add_argument("--log-level", choices=["INFO", "DEBUG", "ERROR", "NONE"], default="INFO")
     parser.add_argument("--log-dir", default=log_dir)
+    parser.add_argument("--quiet", action="store_true", help="Disable alerts")
     parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--hostname", default="0.0.0.0")
     return parser.parse_args()
@@ -47,7 +51,10 @@ if __name__ == "__main__":
     log.print_bold(f"Starting flask app. Port: {port}, Host: {host}")
     status_app = create_app()
 
-    publisher = Publisher()
+    discord = discord_notify.Notifier(DISCORD_WEBHOOK)
+
+    publisher = Publisher(discord, args.quiet)
+
     publish_thread = threading.Thread(target=publisher.run, daemon=True)
     publish_thread.start()
 
