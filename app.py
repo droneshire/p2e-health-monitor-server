@@ -1,10 +1,12 @@
 import argparse
 import os
+import threading
 
 from flask import Flask
 
 from api.route import health, home
 from database.connect import db
+from status_publisher import Publisher
 from utils import log
 from utils.file_util import make_sure_path_exists
 
@@ -20,7 +22,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def create_app():
+def create_app() -> Flask:
     app = Flask(__name__)
     app.config.from_pyfile("config.py")
 
@@ -45,4 +47,8 @@ if __name__ == "__main__":
     log.print_bold(f"Starting flask app. Port: {port}, Host: {host}")
     status_app = create_app()
 
-    status_app.run(host=host, port=port, debug=False)
+    publisher = Publisher()
+    publish_thread = threading.Thread(target=publisher.run, daemon=True)
+    publish_thread.start()
+
+    status_app.run(host=host, port=port, debug=True)
