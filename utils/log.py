@@ -27,19 +27,19 @@ class MultiHandler(logging.Handler):
     a global lock and it'd be OK to just have a per-thread or per-file lock.
     """
 
-    def __init__(self, dirname, block_list_prefixes: T.List[str] = []):
+    def __init__(self, dirname, block_list_prefixes: T.Optional[T.List[str]] = None):
         super().__init__()
         self.files: T.Dict[str, T.TextIO] = {}
         self.dirname = dirname
-        self.block_list_prefixes = block_list_prefixes
+        self.block_list_prefixes = [] if block_list_prefixes is None else block_list_prefixes
         if not os.access(dirname, os.W_OK):
             raise Exception(f"Directory {dirname} not writeable")
 
     def flush(self):
         self.acquire()
         try:
-            for fp in self.files.values():
-                fp.flush()
+            for file_pointer in self.files.values():
+                file_pointer.flush()
         finally:
             self.release()
 
@@ -49,10 +49,10 @@ class MultiHandler(logging.Handler):
         try:
             if key in self.files:
                 return self.files[key]
-            else:
-                fp = open(os.path.join(self.dirname, f"{key}.log"), "a")
-                self.files[key] = fp
-                return fp
+
+            file_pointer = open(os.path.join(self.dirname, f"{key}.log"), "a", encoding="utf-8")
+            self.files[key] = file_pointer
+            return file_pointer
         finally:
             self.release()
 
@@ -62,9 +62,9 @@ class MultiHandler(logging.Handler):
             name = record.threadName
             if any([n for n in self.block_list_prefixes if name.startswith(n)]):
                 return
-            fp = self._get_or_open(name)
+            file_pointer = self._get_or_open(name)
             msg = self.format(record)
-            fp.write(f"{msg.encode('utf-8')}\n")
+            file_pointer.write(f"{msg.encode('utf-8')}\n")
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
@@ -146,8 +146,8 @@ def make_formatter_printer(
 
     if return_formatter:
         return formatter
-    else:
-        return printer
+
+    return printer
 
 
 print_ok_blue = make_formatter_printer(Colors.OKBLUE)

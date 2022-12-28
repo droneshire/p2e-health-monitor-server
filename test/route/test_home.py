@@ -11,6 +11,6 @@ class TestHome(TestCase):
         """
         Tests the route home screen message
         """
-        rv = self.app.get("/api/")
+        route_variable = self.app.get("/api/")
 
-        self.assertEqual({"message": "Welcome to P2E server"}, rv.get_json())
+        self.assertEqual({"message": "Welcome to P2E server"}, route_variable.get_json())

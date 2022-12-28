@@ -1,7 +1,6 @@
 from sqlalchemy.sql import func
 
 from database.connect import db
-from database.users import Users
 
 
 class Health(db.Model):  # type: ignore

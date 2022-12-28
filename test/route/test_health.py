@@ -11,6 +11,6 @@ class TestHealth(TestCase):
         """
         Tests the health endpoint
         """
-        rv = self.app.get("/api/health/")
+        route_variable = self.app.get("/api/health/")
 
-        self.assertEqual({"message": "IMVU Server"}, rv.get_json())
+        self.assertEqual({"message": "IMVU Server"}, route_variable.get_json())

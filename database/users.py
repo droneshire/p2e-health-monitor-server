@@ -1,3 +1,5 @@
+from sqlalchemy.sql import func
+
 from database.connect import db
 
 

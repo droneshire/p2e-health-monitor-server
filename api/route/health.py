@@ -5,8 +5,9 @@ from flask.wrappers import Response
 from sqlalchemy import exc
 
 from database.connect import db
-from database.user import User
-from util import log
+from database.health import Health
+from database.users import User
+from utils import log
 
 health_api = Blueprint("health", __name__)
 
@@ -18,7 +19,7 @@ def new_account() -> Response:
     """
     data = request.get_json()
     if not data:
-        log.print_fail(f"Failed to add new user!")
+        log.print_fail("Failed to add new user!")
         return make_response(
             jsonify({"status": "error", "message": "failed to add user"}),
             HTTPStatus.BAD_REQUEST.value,
@@ -31,7 +32,7 @@ def new_account() -> Response:
     log.print_normal(f"POST: health, email {email}, password {password}, 18+ {plus_18}")
 
     if not email or not password or plus_18 is None:
-        log.print_fail(f"Failed to add new user!")
+        log.print_fail("Failed to add new user!")
         return make_response(
             jsonify({"status": "error", "message": "failed to add user"}),
             HTTPStatus.BAD_REQUEST.value,
@@ -58,7 +59,7 @@ def new_account() -> Response:
             HTTPStatus.BAD_REQUEST.value,
         )
 
-    log.print_ok_arrow(f"Succeeded!")
+    log.print_ok_arrow("Succeeded!")
     return make_response(
         jsonify({"status": "success", "message": "health updated"}), HTTPStatus.OK.value
     )

@@ -1,11 +1,9 @@
 import argparse
-import logging
 import os
-import time
 
 from flask import Flask
 
-from api.route import health
+from api.route import health, home
 from utils import log
 from utils.file_util import make_sure_path_exists
 
@@ -46,6 +44,6 @@ if __name__ == "__main__":
     host = args.hostname
 
     log.print_bold(f"Starting flask app. Port: {port}, Host: {host}")
-    app = create_app()
+    status_app = create_app()
 
-    app.run(host=host, port=port, debug=False)
+    status_app.run(host=host, port=port, debug=False)
