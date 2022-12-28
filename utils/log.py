@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import collections
 import logging
 import os
 import sys
@@ -27,9 +30,9 @@ class MultiHandler(logging.Handler):
     a global lock and it'd be OK to just have a per-thread or per-file lock.
     """
 
-    def __init__(self, dirname, block_list_prefixes: T.Optional[T.List[str]] = None):
+    def __init__(self, dirname, block_list_prefixes: list[str] | None = None):
         super().__init__()
-        self.files: T.Dict[str, T.TextIO] = {}
+        self.files: dict[str, T.TextIO] = {}
         self.dirname = dirname
         self.block_list_prefixes = [] if block_list_prefixes is None else block_list_prefixes
         if not os.access(dirname, os.W_OK):
@@ -67,7 +70,7 @@ class MultiHandler(logging.Handler):
             file_pointer.write(f"{msg.encode('utf-8')}\n")
         except (KeyboardInterrupt, SystemExit):
             raise
-        except:
+        except:  # pylint: disable=bare-except
             self.handleError(record)
 
 
@@ -113,7 +116,7 @@ def make_formatter_printer(
     log_level: int = logging.INFO,
     prefix: str = "",
     return_formatter: bool = False,
-) -> T.Callable:
+) -> collections.abc.Callable:
     game_logger = logging.getLogger(__name__)
 
     def formatter(message, *args, **kwargs):

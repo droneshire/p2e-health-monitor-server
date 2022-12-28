@@ -4,6 +4,7 @@ import os
 from flask import Flask
 
 from api.route import health, home
+from database.connect import db
 from utils import log
 from utils.file_util import make_sure_path_exists
 
@@ -25,8 +26,6 @@ def create_app():
 
     app.register_blueprint(health.health_api, url_prefix="/api")
     app.register_blueprint(home.home_api, url_prefix="/api")
-
-    from database.connect import db
 
     db.init_app(app)
 
