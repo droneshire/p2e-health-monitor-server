@@ -84,8 +84,8 @@ def health(botname) -> Response:
                 botter = User(username=user["username"], health_id=bot.id)
             botter.wallets = user["wallets"]
 
-        with ManagedSession() as session:
-            session.add(botter)  # pylint: disable=no-member
+            with ManagedSession() as session:
+                session.add(botter)  # pylint: disable=no-member
 
         log.print_normal(f"Updated bot status: {json.dumps(data, indent=4)}")
 
