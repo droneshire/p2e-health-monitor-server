@@ -2,7 +2,6 @@ import argparse
 import os
 import threading
 
-import discord_notify
 from flask import Flask
 
 from api.route import health, home
@@ -11,7 +10,10 @@ from status_publisher import Publisher
 from utils import log
 from utils.file_util import make_sure_path_exists
 
-DISCORD_WEBHOOK = ""
+DISCORD_WEBHOOK = {
+    "TEST": "https://discordapp.com/api/webhooks/1058264841481097247/N6xn9gt48MzKCMokMzA-OhUVrfMuIfizGnADC0G4Zljd1syy8f15vlRB7e8_FVXl-v72",
+    "HEALTH_MONITOR": "https://discordapp.com/api/webhooks/1058252579500457984/mzF0xp5YAJsINCkLqes1QmCFpUNGBt1KQ99b70DWIJyURsFkWjaOSWO7Ezx7aB1oxPgS",
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -23,6 +25,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--quiet", action="store_true", help="Disable alerts")
     parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--hostname", default="0.0.0.0")
+    parser.add_argument("--webhook", default=list(DISCORD_WEBHOOK.keys()), help="Webhooks")
     return parser.parse_args()
 
 
@@ -51,11 +54,11 @@ if __name__ == "__main__":
     log.print_bold(f"Starting flask app. Port: {port}, Host: {host}")
     status_app = create_app()
 
-    discord = discord_notify.Notifier(DISCORD_WEBHOOK)
-
-    publisher = Publisher(discord, args.quiet)
+    server_url = f"http://{host}:{port}/api"
+    log.print_ok_blue_arrow(server_url)
+    publisher = Publisher(server_url, DISCORD_WEBHOOK[args.webhook], args.quiet)
 
     publish_thread = threading.Thread(target=publisher.run, daemon=True)
     publish_thread.start()
 
-    status_app.run(host=host, port=port, debug=True)
+    status_app.run(host=host, port=port, debug=False)

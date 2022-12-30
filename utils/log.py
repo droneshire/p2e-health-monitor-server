@@ -9,6 +9,7 @@ import typing as T
 
 from utils.file_util import make_sure_path_exists
 
+
 class Colors:
     HEADER = "\033[95m"
     OKBLUE = "\033[94m"
@@ -90,7 +91,7 @@ def setup_log(log_level: str, log_dir: str, id_string: str) -> None:
     log_file = os.path.join(log_dir, log_name)
 
     make_sure_path_exists(log_dir)
-    
+
     logging.basicConfig(
         filename=log_file,
         level=logging.getLevelName(log_level),

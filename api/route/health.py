@@ -1,3 +1,4 @@
+import datetime
 import json
 from http import HTTPStatus
 
@@ -10,6 +11,18 @@ from database.user import User
 from utils import log
 
 health_api = Blueprint("health", __name__)
+
+
+@health_api.route("/health", methods=["GET"])
+def health_all() -> Response:
+    log.print_normal(f"GET: health")
+
+    bots = Health.query.all()
+
+    log.print_ok_arrow("Succeeded!")
+    data = {"result": [HealthSchema().dump(bot) for bot in bots]}
+    log.print_normal(f"All bots status: {json.dumps(data, indent=4)}")
+    return make_response(jsonify(data), HTTPStatus.OK.value)
 
 
 @health_api.route("/health/<botname>", methods=["GET", "POST"])
@@ -41,40 +54,38 @@ def health(botname) -> Response:
         if botname != data["name"]:
             log.print_warn(f"User specified name {data['name']} doesn't match endpoint {botname}")
 
+        if bot is None:
+            bot = Health(name=botname, num_users=data["num_users"])
+        else:
+            bot.num_users = data["num_users"]
+
+        bot.last_ping = datetime.datetime.now()
+
         with ManagedSession() as session:
-            if bot is None:
-                bot = Health(name=botname, alive=True, num_users=data["num_users"])
-            else:
-                bot.alive = True
-                bot.num_users = data["num_users"]
-
-            if data.get("config_update", ""):
-                bot.config_update = data["config_update"]
-
             session.add(bot)  # pylint: disable=no-member
 
-            for user in data["users"]:
-                missing_fields = [i for i in user.keys() if i not in ["username", "wallets"]]
-                if any(missing_fields):
-                    log.print_fail("Missing fields for users")
-                    return make_response(
-                        jsonify(
-                            {
-                                "status": "error",
-                                "message": f"missing user info fields {missing_fields}",
-                            }
-                        ),
-                        HTTPStatus.PARTIAL_CONTENT.value,
-                    )
-                botter = (
-                    User.query.filter_by(health_id=bot.id)
-                    .filter_by(username=user["username"])
-                    .first()
+        for user in data["users"]:
+            missing_fields = [i for i in user.keys() if i not in ["username", "wallets"]]
+            if any(missing_fields):
+                log.print_fail("Missing fields for users")
+                return make_response(
+                    jsonify(
+                        {
+                            "status": "error",
+                            "message": f"missing user info fields {missing_fields}",
+                        }
+                    ),
+                    HTTPStatus.PARTIAL_CONTENT.value,
                 )
-                if botter is None:
-                    botter = User(username=user["username"], health_id=bot.id)
-                botter.wallets = user["wallets"]
-                session.add(botter)  # pylint: disable=no-member
+            botter = (
+                User.query.filter_by(health_id=bot.id).filter_by(username=user["username"]).first()
+            )
+            if botter is None:
+                botter = User(username=user["username"], health_id=bot.id)
+            botter.wallets = user["wallets"]
+
+        with ManagedSession() as session:
+            session.add(botter)  # pylint: disable=no-member
 
         log.print_normal(f"Updated bot status: {json.dumps(data, indent=4)}")
 

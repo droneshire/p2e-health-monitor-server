@@ -39,6 +39,6 @@ test:
 	$(RUN_PY) unittest discover -s test/ -p *_test.py -v
 
 server:
-	$(RUN_PY) app --port 8080 --host localhost
+	$(RUN_PY) app --port 8080 --host localhost --webhook TEST
 
 .PHONY: install run_black run_isort format check_format run_mypy run_pylint lint test server
