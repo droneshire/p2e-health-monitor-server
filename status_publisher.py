@@ -76,18 +76,23 @@ class Publisher:
             return
 
         for bot in bots:
-            is_alive = (now - bot.last_ping).total_seconds() > self.DEAD_DELTA_TIME
+            delta = now - bot["last_ping"]
+            is_alive = delta.total_seconds() < self.DEAD_DELTA_TIME
             status = ALIVE if is_alive else DEAD
             message = f"{status*5}"
             log.print_normal(message)
-            embed.add_embed_field(name=bot.name, value=message, inline=False)
+            embed.add_embed_field(name=bot["name"], value=message, inline=False)
 
         embed.set_thumbnail(url=THUMBNAIL_URL)
 
+        self.webhook.remove_embeds()
         self.webhook.add_embed(embed=embed)
 
         try:
-            self.response = self.webhook.execute()
+            if self.response is None:
+                self.response = self.webhook.execute()
+            else:
+                self.webhook.edit()
         except:  # pylint: disable=bare-except
             log.print_fail("Failed to post embed")
             self.response = None
