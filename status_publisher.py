@@ -19,7 +19,7 @@ THUMBNAIL_URL = "https://media.discordapp.net/attachments/986155484237156384/103
 
 
 class Publisher:
-    DEAD_DELTA_TIME = 60.0 * 60.0 * 60.0
+    DEAD_DELTA_TIME = 60.0 * 60.0 * 1.0
 
     def __init__(self, server_url: str, discord_url: str, quiet: bool = False) -> None:
         self.quiet = quiet
