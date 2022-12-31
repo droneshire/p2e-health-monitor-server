@@ -25,7 +25,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--quiet", action="store_true", help="Disable alerts")
     parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--hostname", default="0.0.0.0")
-    parser.add_argument("--webhook", default=list(DISCORD_WEBHOOK.keys()), help="Webhooks")
+    parser.add_argument(
+        "--webhook", choices=list(DISCORD_WEBHOOK.keys()), default="HEALTH_MONITOR", help="Webhooks"
+    )
     return parser.parse_args()
 
 
