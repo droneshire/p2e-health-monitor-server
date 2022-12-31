@@ -11,6 +11,7 @@ from discord_webhook import DiscordEmbed, DiscordWebhook
 from database.connect import ManagedSession
 from database.health import Health, HealthSchema
 from utils import log
+from utils.general import get_pretty_seconds
 
 DEAD = f"\U0001F494"
 ALIVE = f"\U0001F49A"
@@ -79,8 +80,9 @@ class Publisher:
             return
 
         for bot in bots:
-            delta = now - bot["last_ping"]
-            is_alive = delta.total_seconds() < self.DEAD_DELTA_TIME
+            delta = now - bot["last_ping"].total_seconds()
+            log.print_normal(f"{get_pretty_seconds(int(delta))}")
+            is_alive = delta < self.DEAD_DELTA_TIME
             status = ALIVE if is_alive else DEAD
             message = f"{status*len(bot['users'])}"
             log.print_normal(message)
