@@ -63,7 +63,10 @@ class Publisher:
 
         embed = DiscordEmbed(
             title="P2E Auto Bot Status",
-            description="Health monitor for all bots in the P2E Auto ecosystem",
+            description=(
+                "Health monitor for all bots in the P2E Auto ecosystem. "
+                "Each symbol represents a unique botter."
+            ),
             color=Color.teal().value,  # pylint: disable=attr-defined
         )
 
