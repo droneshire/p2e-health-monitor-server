@@ -83,6 +83,7 @@ def health(botname) -> Response:
             if botter is None:
                 botter = User(username=user["username"], health_id=bot.id)
             botter.wallets = user["wallets"]
+            botter.last_ping = datetime.datetime.now()
 
             with ManagedSession() as session:
                 session.add(botter)  # pylint: disable=no-member

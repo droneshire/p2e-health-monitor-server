@@ -9,6 +9,7 @@ class User(db.Model):  # type: ignore
     username = db.Column(db.String(80), unique=False, nullable=False)
     wallets = db.Column(db.Integer, nullable=False)
     health_id = db.Column(db.Integer, db.ForeignKey("health.id"))
+    last_ping = db.Column(db.DateTime(timezone=True), server_default=func.now())
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
 
     def __repr__(self):
@@ -20,4 +21,5 @@ class UserSchema(Schema):  # type: ignore
     username = fields.Str()
     wallets = fields.Int()
     health_id = fields.Int()
+    last_ping = fields.DateTime()
     created_at = fields.DateTime()

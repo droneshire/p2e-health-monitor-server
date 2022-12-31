@@ -1,4 +1,3 @@
-
 def get_pretty_seconds(s: int) -> str:
     """Given an amount of seconds, return a formatted string with
     hours, minutes and seconds; taken from
