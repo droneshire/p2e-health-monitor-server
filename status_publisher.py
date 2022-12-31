@@ -80,7 +80,7 @@ class Publisher:
             return
 
         for bot in bots:
-            delta = now - bot["last_ping"].total_seconds()
+            delta = (now - bot["last_ping"]).total_seconds()
             log.print_normal(f"{get_pretty_seconds(int(delta))}")
             is_alive = delta < self.DEAD_DELTA_TIME
             status = ALIVE if is_alive else DEAD
