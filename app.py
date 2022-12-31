@@ -33,8 +33,8 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.config.from_pyfile("config.py")
 
-    app.register_blueprint(health.health_api, url_prefix="/api")
-    app.register_blueprint(home.home_api, url_prefix="/api")
+    app.register_blueprint(health.health_api, url_prefix="/monitor")
+    app.register_blueprint(home.home_api, url_prefix="/monitor")
 
     db.init_app(app)
 
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     log.print_bold(f"Starting flask app. Port: {port}, Host: {host}")
     status_app = create_app()
 
-    server_url = f"http://{host}:{port}/api"
+    server_url = f"http://{host}:{port}/monitor"
     log.print_ok_blue_arrow(server_url)
     publisher = Publisher(server_url, DISCORD_WEBHOOK[args.webhook], args.quiet)
 
