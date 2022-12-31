@@ -79,7 +79,7 @@ class Publisher:
             delta = now - bot["last_ping"]
             is_alive = delta.total_seconds() < self.DEAD_DELTA_TIME
             status = ALIVE if is_alive else DEAD
-            message = f"{status*5}"
+            message = f"{status*len(bots['users'])}"
             log.print_normal(message)
             embed.add_embed_field(name=bot["name"], value=message, inline=False)
 
