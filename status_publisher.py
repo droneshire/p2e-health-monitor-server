@@ -99,7 +99,5 @@ class Publisher:
 
     def run(self) -> None:
         while True:
-            self.delete_message()
-            time.sleep(2.0)
             self.update_status()
             time.sleep(30.0)
